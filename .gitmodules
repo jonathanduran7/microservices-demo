@@ -1,0 +1,9 @@
+[submodule "gateway"]
+	path = gateway
+	url = https://github.com/jonathanduran7/gateway-demo.git
+[submodule "users-service"]
+	path = users-service
+	url = https://github.com/jonathanduran7/users-service.git
+[submodule "products-service"]
+	path = products-service
+	url = https://github.com/jonathanduran7/products-service.git
