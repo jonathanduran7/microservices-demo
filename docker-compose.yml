@@ -1,0 +1,92 @@
+services:
+  # ---------- API Gateway ----------
+  gateway:
+    build: ./gateway
+    container_name: gateway
+    restart: unless-stopped
+    environment:
+      - JWT_SECRET=super‑secret
+      - PORT=3000          
+    ports:
+      - "3000:3000"        
+    depends_on:
+      - users
+      - products
+    networks:
+      - msvc-net
+
+  # ---------- Users microservice ----------
+  users:
+    build: ./users-service
+    container_name: users
+    restart: unless-stopped
+    environment:
+      - DB_HOST=users-db
+      - DB_USERNAME=users_admin
+      - DB_PASSWORD=secret
+      - DB_NAME=users_db
+      - PORT=3000
+    ports:
+      - "3001:3000" 
+    depends_on:
+      - users-db
+    networks:
+      - msvc-net
+
+  users-db:
+    image: postgres:16
+    container_name: users_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: users_admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: users_db
+    volumes:
+      - users_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"        # optional – inspect DB from host
+    networks:
+      - msvc-net
+
+  # ---------- Products microservice ----------
+  products:
+    build: ./products-service
+    container_name: products
+    restart: unless-stopped
+    environment:
+      - DB_HOST=products-db
+      - DB_USERNAME=products_admin
+      - DB_PASSWORD=secret
+      - DB_NAME=products_db
+      - PORT=3000
+    ports:
+      - "3002:3000"
+    depends_on:
+      - products-db
+    networks:
+      - msvc-net
+
+  products-db:
+    image: postgres:16
+    container_name: products_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: products_admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: products_db
+    volumes:
+      - products_pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    networks:
+      - msvc-net
+
+# ---------- Volúmenes ----------
+volumes:
+  users_pgdata:
+  products_pgdata:
+
+# ---------- Red interna ----------
+networks:
+  msvc-net:
+    driver: bridge

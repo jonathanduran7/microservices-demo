@@ -1,0 +1,46 @@
+services:
+  users:
+    build:
+      context: ./users-service
+      target: dev       # usa el stage "dev"
+    volumes:
+      - ./users-service:/app
+      - /app/node_modules
+    command: ["npm", "run", "start:dev"]
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=users-db
+      - DB_USERNAME=users_admin
+      - DB_PASSWORD=secret
+      - DB_NAME=users_db
+  products:
+    build:
+      context: ./products-service
+      target: dev
+    volumes:
+      - ./products-service:/app
+      - /app/node_modules
+    command: ["npm", "run", "start:dev"]
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=products-db
+      - DB_USERNAME=products_admin
+      - DB_PASSWORD=secret
+      - DB_NAME=products_db
+  gateway:
+    build:
+      context: ./gateway
+      target: dev
+    volumes:
+      - ./gateway:/app
+      - /app/node_modules
+    command: ["npm", "run", "start:dev"]
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=super‑secret
