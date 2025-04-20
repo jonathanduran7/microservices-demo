@@ -10,10 +10,10 @@ services:
     ports:
       - "3000:3000"        
     depends_on:
+      - rabbit
       - users
       - products
       - orders
-      - rabbit
     networks:
       - msvc-net
 
@@ -84,14 +84,6 @@ services:
       - msvc-net
 
   # ---------- Orders microservice ----------
-  rabbit:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - msvc-net
-
   orders:
     build: ./orders-service
     container_name: orders
@@ -101,8 +93,8 @@ services:
       - DB_PASSWORD=secret
       - DB_NAME=orders_db
     depends_on:
-      - orders-db
       - rabbit
+      - orders-db
     ports:
       - "3003:3000"
     networks:
@@ -110,6 +102,9 @@ services:
 
   orders-db:
     image: postgres:16
+    container_name: orders_db
+    ports:
+      - "5435:5432"
     environment:
       POSTGRES_USER: orders_admin
       POSTGRES_PASSWORD: secret
@@ -119,6 +114,16 @@ services:
     networks:
       - msvc-net
 
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - msvc-net
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=secret123
 # ---------- Volúmenes ----------
 volumes:
   users_pgdata:
