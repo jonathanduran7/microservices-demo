@@ -12,6 +12,8 @@ services:
     depends_on:
       - users
       - products
+      - orders
+      - rabbit
     networks:
       - msvc-net
 
@@ -81,10 +83,47 @@ services:
     networks:
       - msvc-net
 
+  # ---------- Orders microservice ----------
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - msvc-net
+
+  orders:
+    build: ./orders-service
+    container_name: orders
+    environment:
+      - DB_HOST=orders-db
+      - DB_USERNAME=orders_admin
+      - DB_PASSWORD=secret
+      - DB_NAME=orders_db
+    depends_on:
+      - orders-db
+      - rabbit
+    ports:
+      - "3003:3000"
+    networks:
+      - msvc-net
+
+  orders-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: orders_admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: orders_db
+    volumes:
+      - orders_pg:/var/lib/postgresql/data
+    networks:
+      - msvc-net
+
 # ---------- Volúmenes ----------
 volumes:
   users_pgdata:
   products_pgdata:
+  orders_pg:
 
 # ---------- Red interna ----------
 networks:
